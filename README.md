@@ -22,14 +22,15 @@ I am not responsible for anything that could go wrong. I am not responsible for 
 ```
 sudo apt update && sudo apt install git -y && sudo git clone https://github.com/pcmv-dev/PlexDrive.git /opt/plexdrive
 ```
-2. Set permissions and make scripts executable
+2. Make scripts executable
 ```
-sudo chmod -R +x /opt/plexdrive/install && sudo chmod +x /opt/plexdrive/rclone-upload && sudo chown -R $USER:$USER /opt/plexdrive
+sudo chmod -R +x /opt/plexdrive/install && sudo chmod +x /opt/plexdrive/rclone-upload
 ```
 3. Create the directories and set permissions
 ```
-sudo mkdir /opt/plexdrive/{plexdrive_upload,plexdrive_mount,plexdrive_cache} /mnt/plexdrive && \
-sudo chown $USER:$USER /mnt/plexdrive
+sudo mkdir -p /opt/plexdrive/{plexdrive_upload,plexdrive_mount,plexdrive_cache} /mnt/plexdrive && \
+sudo chown $USER:$USER /mnt/plexdrive && \
+sudo chown -R $USER:$USER /opt/plexdrive
 ```
 4. Run the installer script to install Rclone, MergerFS, and Fuse
 ```
