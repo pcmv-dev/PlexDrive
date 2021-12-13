@@ -70,6 +70,10 @@ Optional: Change the default Rclone config file variable by modifying your ".bas
 RCLONE_CONFIG=/opt/plexdrive/rclone/rclone.conf
 export RCLONE_CONFIG
 ```
+You can confire by typing
+```
+rclone config file
+```
 I assume most use Google Drive so make sure you create your own client_id 
 > [MAKING YOUR CLIENT ID](https://rclone.org/drive/#making-your-own-client-id)
 
