@@ -63,6 +63,13 @@ Set permission to "rclone.conf"
 ```
 sudo chown -R $USER:$USER /opt/plexdrive/rclone/rclone.conf
 ```
+Optional: Change the default Rclone config file variable by modifying your ".bashrc"
+>Add the following at the end of your "~/.bashrc" then type "source ~/.bashrc"
+```
+# Rclone Config File
+RCLONE_CONFIG=/opt/plexdrive/rclone/rclone.conf
+export RCLONE_CONFIG
+```
 I assume most use Google Drive so make sure you create your own client_id 
 > [MAKING YOUR CLIENT ID](https://rclone.org/drive/#making-your-own-client-id)
 
@@ -108,8 +115,7 @@ DISCORD_NAME_OVERRIDE="RCLONE" # The bot user name
 # Setup Cron Job
 
 ## Manual Entry
-> Add rclone-upload to crontab
-
+Add rclone-upload to crontab
 > Example: 0 */5 * * * /opt/plexdrive/rclone-upload 2>&1
 ```
 $ crontab -e
@@ -119,7 +125,6 @@ Don't run as root!
 ```
 $ bash /opt/plexdrive/install/addcron
 ```
-
 [Crontab Calculator](https://corntab.com/)
 
 ## Credits
