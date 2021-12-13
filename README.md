@@ -26,15 +26,14 @@ sudo apt update && sudo apt install git -y && sudo git clone https://github.com/
 ```
 sudo chmod -R +x /opt/plexdrive/install && sudo chmod +x /opt/plexdrive/rclone-upload && sudo chown -R $USER:$USER /opt/plexdrive
 ```
-3. Run the installer script to install Rclone, MergerFS, and Fuse
-```
-sudo bash /opt/plexdrive/install/plexdrive
-```
-4. Create the directories and set permissions
+3. Create the directories and set permissions
 ```
 sudo mkdir /opt/plexdrive/{plexdrive_upload,plexdrive_mount,plexdrive_cache} /mnt/plexdrive && \
-sudo chown -R $USER:$USER /opt/plexdrive && \
 sudo chown $USER:$USER /mnt/plexdrive
+```
+4. Run the installer script to install Rclone, MergerFS, and Fuse
+```
+sudo bash /opt/plexdrive/install/plexdrive
 ```
 5. Install automount services
 ```
