@@ -70,7 +70,7 @@ Optional: Change the default Rclone config file variable by modifying your ".bas
 RCLONE_CONFIG=/opt/plexdrive/rclone/rclone.conf
 export RCLONE_CONFIG
 ```
-You can confire by typing
+You can confirm by typing
 ```
 rclone config file
 ```
