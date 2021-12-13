@@ -32,7 +32,7 @@ sudo bash /opt/plexdrive/install/plexdrive
 ```
 4. Create the directories and set permissions
 ```
-sudo mkdir /opt/plexdrive/{plexdrive_upload,plexdrive_mount,plexdrive_cache} && \
+sudo mkdir /opt/plexdrive/{plexdrive_upload,plexdrive_mount,plexdrive_cache} /mnt/plexdrive && \
 sudo chown -R $USER:$USER /opt/plexdrive /mnt/plexdrive
 ```
 5. Install automount services
