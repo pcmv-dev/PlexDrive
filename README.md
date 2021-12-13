@@ -17,7 +17,7 @@ I am not responsible for anything that could go wrong. I am not responsible for 
 - Script has only been tested on **Debian 9/10** and **Ubuntu 18.04+**
 
 :warning: Script is still experimental!
-## Installation
+# Installation
 1. Download the PlexDrive repo
 ```
 sudo apt update && sudo apt install git -y && sudo git clone https://github.com/pcmv-dev/PlexDrive.git /opt/plexdrive
