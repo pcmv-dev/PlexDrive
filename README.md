@@ -37,7 +37,7 @@ sudo mkdir /mnt/plexdrive && sudo chown $USER:$USER /mnt/plexdrive
 5. Install automount services
 ```
 sudo cp /opt/plexdrive/systemd/* /etc/systemd/system/ && \
-sudo systemctl daemon reload && \
+sudo systemctl daemon-reload && \
 sudo systemctl enable rclone.service && \
 sudo systemctl enable plexdrive.service
 ```
