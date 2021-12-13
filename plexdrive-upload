@@ -8,7 +8,7 @@ UPLOADREMOTE="plexdrive" # If you have a second remote created for uploads put i
 MEDIA="plexdrive" # Local share name NOTE: The name you want to give your share mount
 
 # SERVICE ACCOUNTS
-# Drop your .json files in your "appdata/rclonedata/service_accounts"
+# Drop your .json files in your "/opt/plexdrive/rclone/service_accounts"
 # Name them "sa_account1.json" "sa_account2.json" etc.
 USESERVICEACCOUNT="Y" # Y/N. Choose whether to use Service Accounts NOTE: Bypass Google 750GB upload limit
 SERVICEACCOUNTNUM="25" # Integer number of service accounts to use.

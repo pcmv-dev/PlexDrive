@@ -20,7 +20,7 @@ sleep 3
 
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-INFO: Rclone, MergerFS, Fuse, Apprise, and Dependencies
+INFO: Rclone, MergerFS, and Fuse
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [1] Install/Update
 [2] Uninstall - Remove all
