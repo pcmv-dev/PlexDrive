@@ -30,6 +30,10 @@ sudo chmod -R +x /opt/plexdrive/install && sudo chmod +x /opt/plexdrive/plexdriv
 ```
 sudo bash /opt/plexdrive/install/plexdrive
 ```
+4. Create the mount directory and set permissions
+```
+mkdir /mnt/plexdrive && sudo chown $USER:$USER /mnt/plexdrive
+```
 # Change Fusermount Permission
 
 If the script fails to modify fuse.conf you can do this manually
