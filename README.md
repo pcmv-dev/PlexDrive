@@ -34,6 +34,13 @@ sudo bash /opt/plexdrive/install/plexdrive
 ```
 sudo mkdir /mnt/plexdrive && sudo chown $USER:$USER /mnt/plexdrive
 ```
+5. Install automount services
+```
+sudo cp /opt/plexdrive/systemd/* /etc/systemd/system/ \
+sudo systemctl daemon reload \
+sudo systemctl enable rclone.service \
+sudo systemctl enable plexdrive.service
+```
 # Change Fusermount Permission
 
 If the script fails to modify fuse.conf you can do this manually
@@ -42,7 +49,6 @@ You must edit  /etc/fuse.conf to use option "allow_other" by uncommenting "user_
 ```
 sudo nano /etc/fuse.conf
 ```
-
 # Configure Rclone
 
 The install script should set your permissions for your **rclone.conf** but if not run the following.
