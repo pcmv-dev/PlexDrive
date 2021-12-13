@@ -1,0 +1,140 @@
+#!/bin/bash
+# Version: 12-11-2021
+# Description: Install Rclone, Mergerfs, and dependencies for PlexDrive
+
+if [ `whoami` != root ]; then
+    echo "Warning! Please run as sudo/root"
+    exit
+fi
+tee <<-NOTICE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INSTALLER: PlexDrive Installer
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISCLAIMER:
+I am not responsible for anything that could go wrong.
+I am not responsible for any data loss that could potentialy happen.
+You agree to use these scripts at your own risk.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NOTICE
+sleep 3
+
+tee <<-EOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INFO: Rclone, MergerFS, Fuse, Apprise, and Dependencies
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[1] Install/Update
+[2] Uninstall - Remove all
+[3] Exit
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+
+read -p "Type a Number | Press [ENTER]: " answer </dev/tty
+if [ "$answer" == "1" ]; then
+    echo "Continue with install.."
+    elif [ "$answer" == "2" ]; then
+    echo
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Uninstall/Remove all..."
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo
+    read -p "Are you sure you want to Uninstall (y/n)? " answer </dev/tty
+    if [ "$answer" != "${answer#[Yy]}" ]; then
+        echo
+        echo "Uninstalling Rclone, MergerFS, and Fuse..."
+        sleep 2
+        rm -rf /usr/bin/rclone
+        apt-get autoremove fuse mergerfs -y
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "UNINSTALL COMPLETE"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        exit
+    else
+        exit
+    fi
+    elif [ "$answer" == "3" ]; then
+    exit
+fi
+
+tee <<-EOF
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Installing prerequesites...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+apt-get update && apt-get install python3 python3-pip curl git p7zip-full fuse -y
+
+tee <<-EOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Installing Rclone...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+sleep 2
+if [ -x "$(command -v rclone)" ]; then
+    echo
+    echo "Rclone already installed..."
+    read -p "Install/Update anyway (y/n)? " answer </dev/tty
+    if [ "$answer" != "${answer#[Yy]}" ]; then
+        rm -rf /usr/bin/rclone
+        curl https://rclone.org/install.sh | bash
+    fi
+else
+    curl https://rclone.org/install.sh |  bash
+    chown -R ${currentuser}:${currentuser} $HOME/.config/rclone 2>/dev/null
+fi
+
+tee <<-EOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Install MergerFS...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+sleep 2
+id="$(grep -oP '(?<=^ID=).+' /etc/os-release | tr -d '"')"
+version_codename="$(grep -oP '(?<=^VERSION_CODENAME=).+' /etc/os-release | tr -d '"')"
+mergerfs="/tmp/mergerfs.deb"
+mergerfs_latest="$(curl -s -o /dev/null -I -w "%{redirect_url}\n" https://github.com/trapexit/mergerfs/releases/latest | grep -oP "[0-9]+(\.[0-9]+)+$")"
+url="https://github.com/trapexit/mergerfs/releases/download/${mergerfs_latest}/mergerfs_${mergerfs_latest}.${id}-${version_codename}_amd64.deb"
+if [ -x "$(command -v mergerfs)" ]; then
+    echo
+    echo "Mergerfs already installed..."
+    read -p "Install/Update anyway (y/n)? " answer </dev/tty
+    if [ "$answer" != "${answer#[Yy]}" ]; then
+        rm -rf /usr/bin/mergerfs
+        curl -fsSL $url -o $mergerfs
+        chmod +x $mergerfs
+        dpkg -i $mergerfs
+        chown root /usr/bin/mergerfs
+        chmod u+s /usr/bin/mergerfs
+    fi
+else
+    curl -fsSL $url -o $mergerfs
+    chmod +x $mergerfs
+    dpkg -i $mergerfs
+    chown root /usr/bin/mergerfs
+    chmod u+s /usr/bin/mergerfs
+fi
+rm $mergerfs 2>/dev/null
+find="$(cat /etc/fuse.conf | grep -c "#user_allow_other")"
+if [ $find != 0 ]; then
+    echo "Modifiying /etc/fuse.conf to user_allow_other"
+    sed -i "s/#user_allow_other/user_allow_other/g" /etc/fuse.conf
+else
+    echo "Fuse is already set to user_allow_other"
+fi
+
+tee <<-EOF
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INSTALL COMPLETE!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+mergerfs -v
+tee <<-EOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+rclone --version
+rclone config file
+tee <<-EOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EOF
+exit

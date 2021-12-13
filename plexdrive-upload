@@ -1,0 +1,166 @@
+#!/bin/bash
+# Version: 12-11-2021
+# Description: Uploads to your Google drive
+
+# REMOTE AND MOUNT
+REMOTE="plexdrive" # Name of rclone remote mount NOTE: Choose your encrypted remote for sensitive data
+UPLOADREMOTE="plexdrive" # If you have a second remote created for uploads put it here. Otherwise use the same remote as REMOTE
+MEDIA="plexdrive" # Local share name NOTE: The name you want to give your share mount
+
+# SERVICE ACCOUNTS
+# Drop your .json files in your "appdata/rclonedata/service_accounts"
+# Name them "sa_account1.json" "sa_account2.json" etc.
+USESERVICEACCOUNT="Y" # Y/N. Choose whether to use Service Accounts NOTE: Bypass Google 750GB upload limit
+SERVICEACCOUNTNUM="25" # Integer number of service accounts to use.
+
+# DISCORD NOTIFICATIONS
+DISCORD_WEBHOOK_URL="" # Enter your Discord Webhook URL for notifications. Otherwise leave empty to disable
+DISCORD_ICON_OVERRIDE="https://raw.githubusercontent.com/rclone/rclone/master/graphics/logo/logo_symbol/logo_symbol_color_256px.png" # The bot user image
+DISCORD_NAME_OVERRIDE="RCLONE" # The bot user name
+
+################################################################
+#### ADVANCED CONFIG: ONLY EDIT IF YOU KNOW WHAT YOUR DOING ####
+################################################################
+
+# Make sure we are not running as root
+if [[ `whoami` == root ]]; then
+    echo "Do not run as sudo/root!"
+    exit
+fi
+
+# Advanced Settings, Edit only if you know what you are doing
+MEDIAROOT="/mnt" # Your root directory. The directory where you want everything saved to
+APPDATA="/opt/plexdrive/rclone" # Rclone data folder location
+RCLONEUPLOAD="/opt/plexdrive/plexdrive_upload" # Staging folder of files to be uploaded NOTE: Local files
+RCLONEMOUNT="/opt/plexdrive/plexdrive_mount" # Rclone mount folder NOTE: Do not drop files here, it is unreliable
+MERGERFSMOUNT="/mnt/$MEDIA" # Local share location NOTE: This is where your files go
+RCLONECONF="$HOME/.config/rclone.conf" # Rclone config file location
+LOCKFILE="/opt/plexdrive/rclone/upload.lock" # Rclone upload lock file
+SERVICEACCOUNTDIR="/opt/plexdrive/rclone/service_accounts" # Path to your Service Account's .json files
+SERVICEACCOUNTFILE="sa_account" # Service Account file name without "00.json"
+LOGFILE="/opt/plexdrive/logs/plexdrive-upload.log" # Log file for upload
+
+# Check if script is already running
+echo " ==== STARTING UPLOAD SCRIPT ===="
+if [[ -f "$LOCKFILE" ]]; then
+    echo "$(date "+%d/%m/%Y %T") WARN: Upload already in progress! Script will exit..."
+    exit
+else
+    touch $LOCKFILE
+fi
+
+# Check if Rclone/Mergerfs mount created
+if [[ -n "$(ls -A $MERGERFSMOUNT 2>/dev/null)" ]]; then
+    echo "$(date "+%d/%m/%Y %T") SUCCESS: Check Passed! Your Cloud Drive is mounted, proceeding with upload"
+else
+    echo "$(date "+%d/%m/%Y %T") ERROR: Check Failed! Your Cloud Drive is not mounted, please check your configuration"
+    rm -f $LOCKFILE
+    exit
+fi
+
+# Rotating serviceaccount.json file if using Service Accounts
+if [[ $USESERVICEACCOUNT == 'Y' ]]; then
+    cd $APPDATA
+    COUNTERNUM=$(find -name 'counter*' | cut -c 11,12)
+    CONTERCHECK="1"
+    if [[ "$COUNTERNUM" -ge "$CONTERCHECK" ]];then
+        echo "$(date "+%d/%m/%Y %T") INFO: Counter file found for ${UPLOADREMOTE}"
+    else
+        echo "$(date "+%d/%m/%Y %T") INFO: No counter file found for ${UPLOADREMOTE}. Creating counter_1"
+        touch $APPDATA/counter_1
+        COUNTERNUM="1"
+    fi
+    SERVICEACCOUNT="--drive-service-account-file=$SERVICEACCOUNTDIR/$SERVICEACCOUNTFILE$COUNTERNUM.json"
+    echo "$(date "+%d/%m/%Y %T") INFO: Adjusted Service Account file for upload remote ${UPLOADREMOTE} to ${SERVICEACCOUNTFILE}${COUNTERNUM}.json based on counter ${COUNTERNUM}"
+else
+    echo "$(date "+%d/%m/%Y %T") INFO: Uploading using ${UPLOADREMOTE} remote"
+    SERVICEACCOUNT=""
+fi
+
+# Create Log directory and file
+FILE="`basename "${LOGFILE}"`"
+DIR="`dirname "${LOGFILE}"`"
+mkdir -p "${DIR}" && touch "${DIR}/${FILE}"
+
+# Rclone upload flags
+RCLONE_MOVE() {
+    RCLONE_COMMAND=$(
+    rclone move $RCLONEUPLOAD/ $UPLOADREMOTE: $SERVICEACCOUNT -vv \
+    --config=$RCLONECONF \
+    --user-agent=$UPLOADREMOTE \
+    --stats=9999m \
+    --drive-chunk-size 256M \
+    --min-age 60s \
+    --order-by modtime,ascending \
+    --exclude-if-present .ignore \
+    --exclude downloads/** \
+    --exclude .Recycle.Bin/** \
+    --exclude *fuse_hidden* \
+    --exclude *_HIDDEN \
+    --exclude .recycle** \
+    --exclude *.backup~* \
+    --exclude *.partial~*  \
+    --delete-empty-src-dirs
+    )
+    echo "==== RCLONE DEBUG ===="
+    echo "$RCLONE_COMMAND"
+}
+RCLONE_MOVE
+
+if [[ "$DISCORD_WEBHOOK_URL" != "" ]]; then
+    
+    RCLONE_SANI_COMMAND="$(echo $RCLONE_COMMAND | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g')" # Remove all escape sequences    
+    TRANSFERRED_AMOUNT=${RCLONE_SANI_COMMAND#*Transferred: }
+    TRANSFERRED_AMOUNT=${TRANSFERRED_AMOUNT%% /*}
+    
+    SEND_NOTIFICATION() {
+        NOTIFICATION_DATA='{
+            "username": "'"$DISCORD_NAME_OVERRIDE"'",
+            "avatar_url": "'"$DISCORD_ICON_OVERRIDE"'",
+            "content": null,
+            "embeds": [
+                {
+                    "title": "Rclone Upload Task: Success!",
+                    "color": 4094126,
+                    "fields": [
+                        {
+                            "name": "Completed time",
+                            "value": "'"Date: $(date)"'"
+                        }
+                    ],
+                    "thumbnail": {
+                        "url": null
+                    }
+                }
+            ]
+        }'
+        
+        curl -H "Content-Type: application/json" -d "$NOTIFICATION_DATA" $DISCORD_WEBHOOK_URL
+    }
+    
+    if [[ "$TRANSFERRED_AMOUNT" != "0" ]]; then
+        SEND_NOTIFICATION
+    fi
+    
+fi
+
+# Update Service Account counter
+if [[  $USESERVICEACCOUNT == 'Y' ]]; then
+    if [[ "$COUNTERNUM" == "$SERVICEACCOUNTNUM" ]];then
+        rm $APPDATA/counter_*
+        touch $APPDATA/counter_1
+        echo "$(date "+%d/%m/%Y %T") INFO: Final counter used - resetting loop and created counter_1"
+    else
+        rm $APPDATA/counter_*
+        COUNTERNUM=$((COUNTERNUM+1))
+        touch $APPDATA/counter_$COUNTERNUM
+        echo "$(date "+%d/%m/%Y %T") INFO: Created counter_${COUNTERNUM} for next upload run"
+    fi
+else
+    echo "$(date "+%d/%m/%Y %T") INFO: Not utilising service accounts"
+fi
+
+# Remove lock file and exit
+rm -f $LOCKFILE
+echo "$(date "+%d/%m/%Y %T") SUCCESS: Upload Complete"
+exit
