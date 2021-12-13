@@ -55,12 +55,13 @@ sudo nano /etc/fuse.conf
 
 The install script should set your permissions for your **rclone.conf** but if not run the following.
 If you don't set permissions rclone will complain that it is needs sudo/root to run, which we do not want.
-```
-sudo chown -R $USER:$USER $HOME/.config/rclone
-```
 Create your rclone.conf
 ```bash
 rclone config --config /opt/plexdrive/rclone/rclone.conf
+```
+Set permission to "rclone.conf"
+```
+sudo chown -R $USER:$USER /opt/plexdrive/rclone/rclone.conf
 ```
 I assume most use Google Drive so make sure you create your own client_id 
 > [MAKING YOUR CLIENT ID](https://rclone.org/drive/#making-your-own-client-id)
