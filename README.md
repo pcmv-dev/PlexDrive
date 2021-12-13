@@ -122,12 +122,12 @@ DISCORD_NAME_OVERRIDE="RCLONE" # The bot user name
 Add rclone-upload to crontab
 > Example: 0 */5 * * * /opt/plexdrive/rclone-upload 2>&1
 ```
-$ crontab -e
+crontab -e
 ```
 ## Using Provided Script in the "Install" folder
 Don't run as root!
 ```
-$ bash /opt/plexdrive/install/addcron
+bash /opt/plexdrive/install/addcron
 ```
 [Crontab Calculator](https://corntab.com/)
 
