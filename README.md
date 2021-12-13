@@ -10,13 +10,11 @@ Automate uploading to your cloud storage. This uses "Mergerfs" for compatibility
 This guide will help you get started and is by no means the best way of doing things... this is what works for me. I created this repo for my own reference.
 
 # Disclaimer
-
-I am not responsible for anything that could go wrong. I am not responsible for any data loss that could potentialy happen. You agree to use these scripts at your own risk.
+⚠️ I am not responsible for anything that could go wrong. I am not responsible for any data loss that could potentialy happen. You agree to use these scripts at your own risk.
 
 # Requirements
 - Script has only been tested on **Debian 9/10** and **Ubuntu 18.04+**
 
-:warning: Script is still experimental!
 # Installation
 1. Download the PlexDrive repo
 ```
