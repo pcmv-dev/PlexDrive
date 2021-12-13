@@ -40,7 +40,7 @@ If the script fails to modify fuse.conf you can do this manually
 
 You must edit  /etc/fuse.conf to use option "allow_other" by uncommenting "user_allow_other"
 ```
-$ sudo nano /etc/fuse.conf
+sudo nano /etc/fuse.conf
 ```
 
 # Configure Rclone
@@ -48,11 +48,11 @@ $ sudo nano /etc/fuse.conf
 The install script should set your permissions for your **rclone.conf** but if not run the following.
 If you don't set permissions rclone will complain that it is needs sudo/root to run, which we do not want.
 ```
-$ sudo chown -R $USER:$USER $HOME/.config/rclone
+sudo chown -R $USER:$USER $HOME/.config/rclone
 ```
 Create your rclone.conf
 ```bash
-$ rclone config
+rclone config
 ```
 I assume most use Google Drive so make sure you create your own client_id 
 > [MAKING YOUR CLIENT ID](https://rclone.org/drive/#making-your-own-client-id)
