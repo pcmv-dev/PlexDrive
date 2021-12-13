@@ -32,7 +32,7 @@ sudo bash /opt/plexdrive/install/plexdrive
 ```
 4. Create the mount directory and set permissions
 ```
-mkdir /mnt/plexdrive && sudo chown $USER:$USER /mnt/plexdrive
+sudo mkdir /mnt/plexdrive && sudo chown $USER:$USER /mnt/plexdrive
 ```
 # Change Fusermount Permission
 
