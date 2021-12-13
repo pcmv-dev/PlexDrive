@@ -87,6 +87,7 @@ RCLONE_MOVE() {
     RCLONE_COMMAND=$(
     rclone move $RCLONEUPLOAD/ $UPLOADREMOTE: $SERVICEACCOUNT -vv \
     --config=$RCLONECONF \
+    --log-file=$LOGFILE \
     --user-agent=$UPLOADREMOTE \
     --stats=9999m \
     --drive-chunk-size 256M \
