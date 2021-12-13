@@ -24,7 +24,7 @@ sudo apt update && sudo apt install git -y && sudo git clone https://github.com/
 ```
 2. Set permissions and make scripts executable
 ```
-sudo chmod -R +x /opt/plexdrive/install && sudo chmod +x /opt/plexdrive/plexdrive-upload && sudo chown -R $USER:$USER /opt/plexdrive
+sudo chmod -R +x /opt/plexdrive/install && sudo chmod +x /opt/plexdrive/rclone-upload && sudo chown -R $USER:$USER /opt/plexdrive
 ```
 3. Run the installer script to install Rclone, MergerFS, and Fuse
 ```
@@ -59,7 +59,7 @@ sudo chown -R $USER:$USER $HOME/.config/rclone
 ```
 Create your rclone.conf
 ```bash
-rclone config
+rclone config --config /opt/plexdrive/rclone/rclone.conf
 ```
 I assume most use Google Drive so make sure you create your own client_id 
 > [MAKING YOUR CLIENT ID](https://rclone.org/drive/#making-your-own-client-id)
@@ -85,7 +85,7 @@ password2 = <PASSWORDSALT>
 # Upload Script
 ### Do not run the script as sudo/root unless you are running everything as root or you will have permission problems
 ### This script uploads new files to your cloud storage
-Configure the **plexdrive-upload** script. You only need to modify "REMOTE AND MOUNT" "SERVICE ACCOUNTS" and "DISCORD NOTIFICATIONS"
+Configure the **rclone-upload** script. You only need to modify "REMOTE AND MOUNT" "SERVICE ACCOUNTS" and "DISCORD NOTIFICATIONS"
 ```bash
 # REMOTE AND MOUNT
 REMOTE="plexdrive" # Name of rclone remote mount NOTE: Choose your encrypted remote for sensitive data
@@ -106,9 +106,9 @@ DISCORD_NAME_OVERRIDE="RCLONE" # The bot user name
 # Setup Cron Job
 
 ## Manual Entry
-> Add plexdrive-upload to crontab
+> Add rclone-upload to crontab
 
-> Example: 0 */5 * * * /opt/plexdrive/plexdrive-upload 2>&1
+> Example: 0 */5 * * * /opt/plexdrive/rclone-upload 2>&1
 ```
 $ crontab -e
 ```

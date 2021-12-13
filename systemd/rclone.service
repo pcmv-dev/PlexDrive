@@ -10,7 +10,7 @@ After=network-online.target
 User=1000
 Group=1000
 Type=notify
-Environment=RCLONE_CONFIG=$HOME/.config/rclone/rclone.conf
+Environment=RCLONE_CONFIG=/opt/plexdrive/rclone/rclone.conf
 KillMode=none
 Restart=on-failure
 RestartSec=5
