@@ -13,11 +13,6 @@ MEDIA="plexdrive" # Local share name NOTE: The name you want to give your share 
 USESERVICEACCOUNT="Y" # Y/N. Choose whether to use Service Accounts NOTE: Bypass Google 750GB upload limit
 SERVICEACCOUNTNUM="25" # Integer number of service accounts to use.
 
-# DISCORD NOTIFICATIONS
-DISCORD_WEBHOOK_URL="" # Enter your Discord Webhook URL for notifications. Otherwise leave empty to disable
-DISCORD_ICON_OVERRIDE="https://raw.githubusercontent.com/rclone/rclone/master/graphics/logo/logo_symbol/logo_symbol_color_256px.png" # The bot user image
-DISCORD_NAME_OVERRIDE="RCLONE" # The bot user name
-
 ################################################################
 #### ADVANCED CONFIG: ONLY EDIT IF YOU KNOW WHAT YOUR DOING ####
 ################################################################
@@ -39,6 +34,7 @@ LOCKFILE="/opt/plexdrive/rclone/upload.lock" # Rclone upload lock file
 SERVICEACCOUNTDIR="/opt/plexdrive/rclone/service_accounts" # Path to your Service Account's .json files
 SERVICEACCOUNTFILE="sa_account" # Service Account file name without "00.json"
 LOGFILE="/opt/plexdrive/logs/plexdrive-upload.log" # Log file for upload
+SERVICESTATUS="$(systemctl is-active plexdrive.service)" # Check if the systemd "plexdrive.service" is active
 
 # Check if script is already running
 echo " ==== STARTING UPLOAD SCRIPT ===="
@@ -50,7 +46,7 @@ else
 fi
 
 # Check if Rclone/Mergerfs mount created
-if [[ -n "$(ls -A $MERGERFSMOUNT 2>/dev/null)" ]]; then
+if [[ "$SERVICESTATUS" = "active" ]]; then
     echo "$(date "+%d/%m/%Y %T") SUCCESS: Check Passed! Your Cloud Drive is mounted, proceeding with upload"
 else
     echo "$(date "+%d/%m/%Y %T") ERROR: Check Failed! Your Cloud Drive is not mounted, please check your configuration"
@@ -82,12 +78,12 @@ FILE="`basename "${LOGFILE}"`"
 DIR="`dirname "${LOGFILE}"`"
 mkdir -p "${DIR}" && touch "${DIR}/${FILE}"
 
+REMOTES=""
 # Rclone upload flags
 RCLONE_MOVE() {
     RCLONE_COMMAND=$(
     rclone move $RCLONEUPLOAD/ $UPLOADREMOTE: $SERVICEACCOUNT -vv \
     --config=$RCLONECONF \
-    --log-file=$LOGFILE \
     --user-agent=$UPLOADREMOTE \
     --stats=9999m \
     --drive-chunk-size 256M \
@@ -106,44 +102,7 @@ RCLONE_MOVE() {
     echo "==== RCLONE DEBUG ===="
     echo "$RCLONE_COMMAND"
 }
-RCLONE_MOVE
-
-if [[ "$DISCORD_WEBHOOK_URL" != "" ]]; then
-    
-    RCLONE_SANI_COMMAND="$(echo $RCLONE_COMMAND | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g')" # Remove all escape sequences    
-    TRANSFERRED_AMOUNT=${RCLONE_SANI_COMMAND#*Transferred: }
-    TRANSFERRED_AMOUNT=${TRANSFERRED_AMOUNT%% /*}
-    
-    SEND_NOTIFICATION() {
-        NOTIFICATION_DATA='{
-            "username": "'"$DISCORD_NAME_OVERRIDE"'",
-            "avatar_url": "'"$DISCORD_ICON_OVERRIDE"'",
-            "content": null,
-            "embeds": [
-                {
-                    "title": "Rclone Upload Task: Success!",
-                    "color": 4094126,
-                    "fields": [
-                        {
-                            "name": "Completed time",
-                            "value": "'"Date: $(date)"'"
-                        }
-                    ],
-                    "thumbnail": {
-                        "url": null
-                    }
-                }
-            ]
-        }'
-        
-        curl -H "Content-Type: application/json" -d "$NOTIFICATION_DATA" $DISCORD_WEBHOOK_URL
-    }
-    
-    if [[ "$TRANSFERRED_AMOUNT" != "0" ]]; then
-        SEND_NOTIFICATION
-    fi
-    
-fi
+RCLONE_MOVE | tee -a $LOGFILE
 
 # Update Service Account counter
 if [[  $USESERVICEACCOUNT == 'Y' ]]; then
