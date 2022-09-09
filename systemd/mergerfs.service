@@ -1,5 +1,5 @@
-# Version: 2021-12-12
-# PlexDrive Mergerfs
+# Version: 2022-9-09
+# Mergerfs
 # /etc/systemd/system/mergerfs.service
 [Unit]
 Description=Mergerfs Service
