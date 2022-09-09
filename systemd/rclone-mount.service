@@ -1,6 +1,6 @@
 # Version: 2021-12-12
 # Mount Rclone
-# /etc/systemd/system/rclone.service
+# /etc/systemd/system/rclone-mount.service
 [Unit]
 Description=Rclone Service
 Wants=network-online.target
@@ -10,28 +10,27 @@ After=network-online.target
 User=1000
 Group=1000
 Type=notify
-Environment=RCLONE_CONFIG=/opt/plexdrive/rclone/rclone.conf
-KillMode=none
+Environment=RCLONE_CONFIG=/opt/rclone/rclone.conf
 Restart=on-failure
 RestartSec=5
+ExecStartPre=/usr/bin/mkdir -p /mnt/gdrive /mnt/cache
 ExecStart=/usr/bin/rclone mount \
 --uid=1000 --gid=1000 --umask=002 \
 --allow-other \
---syslog \
 --poll-interval 10s \
---dir-cache-time 5000h \
---cache-dir=/opt/plexdrive/plexdrive_cache \
+--dir-cache-time 720h \
+--cache-dir=/mnt/cache \
 --vfs-cache-max-size 30G \
 --vfs-cache-max-age 336h \
 --drive-pacer-min-sleep 10ms \
---drive-pacer-burst 200 \
+--drive-pacer-burst 1000 \
 --vfs-cache-mode full \
 --vfs-cache-poll-interval 5m \
 --vfs-read-ahead 1G \
 --bwlimit-file 32M \
 --rc --rc-no-auth --rc-addr :5572 \
-plexdrive: /opt/plexdrive/plexdrive_mount
-ExecStop=/usr/bin/fusermount -uz /opt/plexdrive/plexdrive_mount
+gdrive: /mnt/gdrive
+ExecStop=/usr/bin/fusermount -uz /mnt/gdrive
 ExecStartPost=/usr/bin/rclone rc vfs/refresh recursive=true --rc-addr 127.0.0.1:5572 _async=true
 
 [Install]
