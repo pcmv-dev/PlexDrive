@@ -1,0 +1,19 @@
+# Version: 2021-12-12
+# PlexDrive Mergerfs
+# /etc/systemd/system/mergerfs.service
+[Unit]
+Description=Mergerfs Service
+Requires=rclone-mount.service
+After=rclone-mount.service
+
+[Service]
+Type=forking
+ExecStartPre=+/usr/bin/mkdir -p /mnt/data /mnt/upload_data
+ExecStartPre=+/usr/bin/chown -R 1000:1000 /mnt/data /mnt/upload_data
+ExecStart=/usr/bin/mergerfs /mnt/upload:/mnt/gdrive /mnt/data \
+-o rw,use_ino,allow_other,func.getattr=newest,category.action=all,category.create=ff,cache.files=auto-full,dropcacheonclose=true
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
